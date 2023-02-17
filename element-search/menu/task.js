@@ -1,15 +1,21 @@
-const link = Array.from(document.querySelectorAll('.menu__link'));
+const menuItem = document.querySelectorAll('.menu__item');
+const menuLink = document.querySelectorAll('.menu__link');
+const menuSub = [...document.querySelectorAll('.menu_sub')];
 
-function handler() {
-  if (document.querySelector('.menu_active') != null && this.nextElementSibling == null) {
-    document.querySelector('.menu_active').classList.remove('menu_active');
+function displayMenu (e) {
+if (e.target.nextElementSibling) {
+    e.preventDefault();
+    e.target.nextElementSibling.classList.toggle("menu_active");
+}
   }
-  if (this.nextElementSibling != null) {
-    this.nextElementSibling.classList.toggle('menu_active');
-    event.preventDefault();
-  } 
+
+function removeActive(e) {
+ if (e.target.closest('.menu__item')) {
+   return;	
+ }
+  menuSub.forEach(el => el.classList.remove('menu_active'));
 }
 
-link.forEach((b) => {
-  b.addEventListener('click', handler)
-});
+
+menuLink.forEach(el => el.onclick = displayMenu);
+document.addEventListener('click', removeActive);
