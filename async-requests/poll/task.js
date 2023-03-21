@@ -1,35 +1,36 @@
-// Find the form element by its ID
-let form = document.getElementById("form");
+const xhr = new XMLHttpRequest();
 
-// Handle the form submission event
-form.addEventListener("submit", (event) => {
-    event.preventDefault(); // Prevent the default form submission behavior
+function getPoll() {
+    xhr.addEventListener('readystatechange', (e) => {
+        if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+            const polls = JSON.parse(e.currentTarget.responseText).data;            
+            const answers = polls['answers'];
+            console.log(answers);
 
-    // Create a new XMLHttpRequest object
-    let xhr = new XMLHttpRequest();
+            const divItemCode = document.querySelector('.poll__title');   
+            const question = polls['title'];
+            divItemCode.textContent = `${question}`;
 
-    // Set event handlers for the XMLHttpRequest object
-    xhr.upload.addEventListener("progress", (event) => {
-        // Update the progress bar value
-        let progress = document.getElementById("progress");
-        progress.value = (event.loaded / event.total) * 100;
-    });
+            answers.forEach(answer => {
+                const pollAnswers = document.getElementById('poll__answers');                
+                let btn = document.createElement('button');
+                btn.classList.add('poll__answer');
+                btn.textContent = `${answer}`;                
+                pollAnswers.appendChild(btn);                
+            });
 
-    xhr.addEventListener("load", () => {
-        // Handle a successful response from the server
-        console.log("Upload successful.");
-    });
+            let buttons = Array.from(document.querySelectorAll('.poll__answer'));
+            console.log(buttons)
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    alert('Спасибо, Ваш ответ засчитан');
+                });
+            });
 
-    xhr.addEventListener("error", () => {
-        // Handle errors that occur during the upload
-        console.log("An error occurred during the upload.");
-    });
+        };
+    });    
+};
 
-    // Open a connection and send the form data to the server
-    xhr.open(
-        "POST",
-        "https://students.netoservices.ru/nestjs-backend/upload",
-        true
-    );
-    xhr.send(new FormData(form));
-});
+xhr.open('GET', ' https://students.netoservices.ru/nestjs-backend/poll');
+xhr.send();
+getPoll();
