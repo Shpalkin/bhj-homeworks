@@ -1,56 +1,47 @@
-const robotMessages = ['Ваше сообщение важно для нас!', 'К сожалению, сейчас все операторы заняты, обратитесь попозже', 'Как только наш оператор освободится. он тут же с вами свяжется', 'Не забывайте обращаться в поддержку при возникновении вопросов!', 'Доброго времени суток! Опишите вашу проблему', 'Какая помощь требуется?']; // Сообщения робота.
-let lastAnswerDate, intervalID;
-const chatContainer = document.body.querySelector('.chat-widget__messages-container');
-const chatWidget = document.body.querySelector('.chat-widget');
-
-chatWidget.addEventListener('click', () => {
-    chatWidget.classList.add('chat-widget_active');
-    lastAnswerDate = new Date().getTime();
-    setTimer();    
-})
-
-document.body.querySelector('#chat-widget__input').addEventListener('keydown', sendMessage);
-
-function setTimer() {
-    clearInterval(intervalID);
-    intervalID = setInterval(() => {
-        console.log(new Date().getTime() - lastAnswerDate);
-        if (new Date().getTime() - lastAnswerDate > 29999) {
-            document.querySelector( '.chat-widget__messages' ).innerHTML += 
-                `<div class="message">
-                    <div class="message__time">${new Date().toString().slice(16,21)}</div>
-                    <div class="message__text">${robotMessages[robotMessages.length -1]}</div>
-                </div>`;
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-                lastAnswerDate = new Date().getTime();
-                setTimer();
-        }
-    }, 30000);
-}
-
-function sendMessage(env) {
-        
-    if (env.keyCode === 13) {
-        if(this.value) {
-              document.querySelector( '.chat-widget__messages' ).innerHTML += 
-            `<div class="message message_client">
-                <div class="message__time">${new Date().toString().slice(16,21)}</div>
-                <div class="message__text">${this.value}</div>
-            </div>`;
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-            this.value = '';
-            
-            const iMessage = Math.floor(Math.random() * 5);
-            
-            document.querySelector( '.chat-widget__messages' ).innerHTML += 
-            `<div class="message">
-                <div class="message__time">${new Date().toString().slice(16,21)}</div>
-                <div class="message__text">${robotMessages[iMessage]}</div>
-            </div>`;
-        lastAnswerDate = new Date().getTime();
-        setTimer();
-        chatContainer.scrollTop = chatContainer.scrollHeight;    
-        }
-
+const messages = [
+    'Кто тут?',
+    'Где ваша совесть?',
+    'Добрый день! До свидания!',
+    'Мы ничего не будем вам продавать',
+    'К сожалению, все операторы сейчас заняты. Не пишите нам больше',
+    'Вы не купили ни одного товара для того, чтобы так с нами разговаривать',
+    'Добрый день, мы ещё не проснулись. Позвоните через 10 лет'
+  ];
+  
+  const redBadge = document.querySelector('.chat-widget__side');
+  const chatWindow = document.querySelector('.chat-widget');
+  const chatMessages = document.getElementById('chat-widget__messages');
+  const inputMessage = document.getElementById('chat-widget__input');
+  
+  const initTimer = 30;
+  
+  const timer = {
+    counter: initTimer,
+    repeat: () => {
+      timer.counter--;
+      if (timer.counter <= 0)
+        robotReply();
     }
-}
+  };
+  
+  const robotReply = () => {
+    timer.counter = initTimer;
+    const index = Math.floor(Math.random() * messages.length);
+    chatMessages.innerHTML += `<div class="message"><div class="message__time">${new Date().toLocaleTimeString().substr(0,5)}</div><div class="message__text">${messages[index]}</div></div>`;
+    chatMessages.lastElementChild.scrollIntoView(false);
+  }
+  
+  redBadge.addEventListener('click', () => {
+    chatWindow.classList.add('chat-widget_active');  
+    setInterval(timer.repeat, 1000);
+  });
+  
+  inputMessage.addEventListener('keydown', function(e) {
+    if (e.code !== 'Enter')
+      return;
+    if (this.value.length === 0)
+      return;
+    chatMessages.innerHTML += `<div class="message message_client"><div class="message__time">${new Date().toLocaleTimeString().substr(0,5)}</div><div class="message__text">${this.value}</div></div>`;  
+    this.value = '';
+    robotReply();
+  });
