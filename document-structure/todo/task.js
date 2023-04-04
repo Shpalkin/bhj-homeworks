@@ -1,31 +1,49 @@
-'use strict'
+'use strict';
 
-let removerOnClick = function(event) {
-	event.parentNode.remove();
-};
-window.onload = function() {
-	const task = document.querySelector('#task__input');
-	task.value = '';
-	document.querySelector('#tasks__add').onclick = function() {
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('task__input');
+    const tasksList = document.getElementById('tasks__list');
+    const storageKey = 'ToDo';
+    loadContent(storageKey);
+    // console.log(localStorage.getItem('ToDo'));
 
-		if (task.value.length == 0) {
-			return false;
-		}	
-		let container = document.createElement('div');
-		container.classList.add('task');
 
-		let discription = document.createElement('div');
-		discription.classList.add('task__title');
-		discription.innerHTML = task.value;
+    function deleteTaskEvent(task) {
+        task.querySelector('.task__remove').addEventListener('click', (e) => {
+            e.preventDefault();
+            task.remove();
+            saveContent(storageKey);
+        })
+    }
 
-		let remover = document.createElement('a');			
-		container.appendChild(discription);
-		container.appendChild(remover);
 
-		document.querySelector('#tasks__list').appendChild(container);
-		remover.outerHTML = '<a onclick="removerOnClick(this)" href="#" class="task__remove">&times;</a>';
-		task.value = '';
+    function saveContent(name) {
+        const string = JSON.stringify(tasksList.innerHTML);
+        localStorage.setItem(name, string);
+    }
 
-		return false;
-	};
-}
+
+    function loadContent(name) {
+        const loaded = JSON.parse(localStorage.getItem(name));
+        tasksList.innerHTML = loaded;
+        const tasks = tasksList.querySelectorAll('.task');
+        tasks.forEach((task) => { deleteTaskEvent(task) });
+    }
+
+
+    input.addEventListener('change', function(e) {
+        if (input.value) {
+            const newTask = document.createElement('div');
+            newTask.classList.add('task');
+            newTask.innerHTML = `
+            <div class="task__title">
+              ${input.value}
+            </div>
+            <a href="#" class="task__remove">&times;</a>`;
+            tasksList.appendChild(newTask);
+            input.value = '';
+            deleteTaskEvent(newTask);
+            saveContent(storageKey);
+        };
+    });
+})
