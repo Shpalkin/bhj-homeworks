@@ -1,70 +1,33 @@
-'ust strict';
+'use strict'
 
-document.addEventListener('DOMContentLoaded', function() {
-    const margin = 10;
-    const allTooltips = document.querySelectorAll('.has-tooltip');
+const hasTooltipEls = Array.from(document.querySelectorAll('.has-tooltip'))
 
+let tooltipEl
 
-    function createTooltip(elementWithHint) {
-        const hint = document.createElement('div');
-        hint.textContent = elementWithHint.title;
-        hint.className = 'tooltip';
-        elementWithHint.insertAdjacentElement('afterend', hint);    
-    }   
-
-    function positionChange(hint, elementWithHint, margin=0) {
-        const dataSet = elementWithHint.dataset.position ? elementWithHint.dataset.position : "bottom";
-        const coordElementWithHint = elementWithHint.getBoundingClientRect();
-        const coordHint = hint.getBoundingClientRect();
-
-        switch (dataSet) {
-            case "bottom":
-                hint.style.left = `${coordElementWithHint.left}px`;
-                hint.style.top = `${coordElementWithHint.bottom + margin}px`;
-                break;
-            case "top":
-                hint.style.left = `${coordElementWithHint.left}px`;
-                hint.style.top = `${coordElementWithHint.top - coordHint.height - margin}px`;
-                break;
-            case "right":
-                hint.style.left = `${coordElementWithHint.left + coordElementWithHint.width + margin}px`;
-                hint.style.top = `${coordElementWithHint.top}px`;
-                break;
-            case "left":
-                hint.style.left = `${coordElementWithHint.left - coordHint.width - margin}px`;
-                hint.style.top = `${coordElementWithHint.top}px`;
-                break;
-        };
+document.body.addEventListener('click', (e) => {
+  e.preventDefault()
+  let tooltipDelete = document.querySelector('.tooltip')
+  let target = e.target.closest('.has-tooltip')
+  if (!target) {
+    return
+  }
+  if (tooltipDelete) {
+    tooltipDelete.remove()
+    if (target.title === tooltipDelete.innerHTML) {
+      return
     }
+  }
+  tooltipEl = document.createElement('div')
+  tooltipEl.innerHTML = target.title
+  tooltipEl.className = 'tooltip tooltip_active'
+  let coords = target.getBoundingClientRect()
+  let bottom = coords.top + target.offsetHeight + 5
+  let left = coords.left + (target.offsetWidth - tooltipEl.offsetWidth) / 2
+  if (left < 0) {
+    left = 0
+  }
+  tooltipEl.style.left = left + 'px'
+  tooltipEl.style.top = bottom + 'px'
 
-    allTooltips.forEach((link) => {
-        createTooltip(link, margin);
-
-        link.addEventListener('click', (e) => {
-            const tooltip = e.currentTarget.nextElementSibling;
-            const activeTooltip = document.querySelector('.tooltip_active');
-
-            if (activeTooltip != tooltip) {
-                if (activeTooltip) {
-                    activeTooltip.classList.remove('tooltip_active');
-                };
-                tooltip.classList.add('tooltip_active');
-                positionChange(tooltip, e.currentTarget, margin);
-            } else {
-                tooltip.classList.remove('tooltip_active');
-            };
-            e.preventDefault();
-        });
-    });
-
-    const windowEvents = ['scroll', 'resize'];
-
-    windowEvents.forEach((event) => {
-        window.addEventListener(event, () => {
-            const activeTooltip = document.querySelector('.tooltip_active');
-            if (activeTooltip) {
-                activeTooltip.classList.remove('tooltip_active');        
-            };
-        });  
-    });
+  document.body.append(tooltipEl)
 })
